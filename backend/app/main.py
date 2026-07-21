@@ -3,6 +3,7 @@ from sqlalchemy import text
 
 from app.core.config import settings
 from app.db.database import engine
+from app.api.router import api_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -10,6 +11,7 @@ app = FastAPI(
     description="Transportation Management System Backend",
 )
 
+app.include_router(api_router)
 
 @app.get("/")
 def root():
