@@ -1,0 +1,21 @@
+# Virtual Environment
+.venv/
+
+# Environment
+.env
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# VS Code
+.vscode/
+
+# Pytest
+.pytest_cache/
+
+# Alembic
+*.db
+
+# Logs
+*.log
