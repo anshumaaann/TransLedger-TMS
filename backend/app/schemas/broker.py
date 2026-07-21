@@ -1,31 +1,33 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
 from uuid import UUID
 
+from pydantic import BaseModel, EmailStr, ConfigDict
 
-class CustomerCreate(BaseModel):
-    customer_code: str
-    customer_name: str
-    short_name: str
 
-    gst_number: str | None = None
-    contact_person: str | None = None
-    mobile: str | None = None
-    email: EmailStr | None = None
-    address: str | None = None
-
-class CustomerUpdate(BaseModel):
-    customer_name: str
-    short_name: str
-
-    gst_number: str | None = None
+class BrokerCreate(BaseModel):
+    broker_code: str
+    broker_name: str
     contact_person: str | None = None
     mobile: str | None = None
     email: EmailStr | None = None
     address: str | None = None
 
 
-class CustomerResponse(CustomerCreate):
+class BrokerUpdate(BaseModel):
+    broker_name: str
+    contact_person: str | None = None
+    mobile: str | None = None
+    email: EmailStr | None = None
+    address: str | None = None
+
+
+class BrokerResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
+    broker_code: str
+    broker_name: str
+    contact_person: str | None
+    mobile: str | None
+    email: EmailStr | None
+    address: str | None
     is_active: bool
