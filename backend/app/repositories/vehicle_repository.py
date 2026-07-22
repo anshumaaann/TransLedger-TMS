@@ -3,113 +3,101 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.models.vehicle import Vehicle
-from app.schemas.vehicle import VehicleCreate, VehicleUpdate
+from app.schemas.vehicle import VehicleUpdate
 
 
 class VehicleRepository:
 
-    @staticmethod
-    def create(db: Session, vehicle: VehicleCreate) -> Vehicle:
-        db_vehicle = Vehicle(
-            vehicle_number=vehicle.vehicle_number,
-            vehicle_type=vehicle.vehicle_type,
-            owner_name=vehicle.owner_name,
-            mobile=vehicle.mobile,
-            capacity=vehicle.capacity,
-        )
 
-        db.add(db_vehicle)
-        db.commit()
-        db.refresh(db_vehicle)
+    def __init__(
+        self,
+        db: Session
+    ):
+        self.db = db
 
-        return db_vehicle
 
-    @staticmethod
-    def get_by_number(
-        db: Session,
-        vehicle_number: str,
-    ) -> Vehicle | None:
+
+    def get_all(self):
+
         return (
-            db.query(Vehicle)
+            self.db.query(Vehicle)
             .filter(
-                Vehicle.vehicle_number == vehicle_number,
-                Vehicle.is_active.is_(True),
+                Vehicle.is_active == True
             )
-            .first()
-        )
-
-    @staticmethod
-    def get_all(db: Session) -> list[Vehicle]:
-        return (
-            db.query(Vehicle)
-            .filter(Vehicle.is_active.is_(True))
+            .order_by(
+                Vehicle.created_at.desc()
+            )
             .all()
         )
 
-    @staticmethod
+
+
     def get_by_id(
-        db: Session,
-        vehicle_id: UUID,
-    ) -> Vehicle | None:
+        self,
+        vehicle_id: UUID
+    ):
+
         return (
-            db.query(Vehicle)
+            self.db.query(Vehicle)
             .filter(
                 Vehicle.id == vehicle_id,
-                Vehicle.is_active.is_(True),
+                Vehicle.is_active == True
             )
             .first()
         )
 
-    @staticmethod
+
+
+    def create(
+        self,
+        vehicle
+    ):
+
+        self.db.add(vehicle)
+
+        self.db.commit()
+
+        self.db.refresh(vehicle)
+
+        return vehicle
+
+
+
     def update(
-        db: Session,
-        vehicle_id: UUID,
-        vehicle: VehicleUpdate,
-    ) -> Vehicle | None:
+        self,
+        vehicle,
+        vehicle_data: VehicleUpdate
+    ):
 
-        db_vehicle = (
-            db.query(Vehicle)
-            .filter(
-                Vehicle.id == vehicle_id,
-                Vehicle.is_active.is_(True),
-            )
-            .first()
+        data = vehicle_data.model_dump(
+            exclude_unset=True
         )
 
-        if db_vehicle is None:
-            return None
 
-        db_vehicle.vehicle_type = vehicle.vehicle_type
-        db_vehicle.owner_name = vehicle.owner_name
-        db_vehicle.mobile = vehicle.mobile
-        db_vehicle.capacity = vehicle.capacity
+        for key,value in data.items():
 
-        db.commit()
-        db.refresh(db_vehicle)
+            setattr(
+                vehicle,
+                key,
+                value
+            )
 
-        return db_vehicle
 
-    @staticmethod
+        self.db.commit()
+
+        self.db.refresh(vehicle)
+
+        return vehicle
+
+
+
     def delete(
-        db: Session,
-        vehicle_id: UUID,
-    ) -> Vehicle | None:
+        self,
+        vehicle
+    ):
 
-        db_vehicle = (
-            db.query(Vehicle)
-            .filter(
-                Vehicle.id == vehicle_id,
-                Vehicle.is_active.is_(True),
-            )
-            .first()
-        )
+        vehicle.is_active = False
 
-        if db_vehicle is None:
-            return None
+        self.db.commit()
 
-        db_vehicle.is_active = False
-
-        db.commit()
-        db.refresh(db_vehicle)
-
-        return db_vehicle
+        return vehicle

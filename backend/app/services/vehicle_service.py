@@ -4,60 +4,170 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.vehicle import Vehicle
-from app.repositories.vehicle_repository import VehicleRepository
-from app.schemas.vehicle import VehicleCreate, VehicleUpdate
+
+from app.repositories.vehicle_repository import (
+    VehicleRepository
+)
+
+from app.schemas.vehicle import (
+    VehicleCreate,
+    VehicleUpdate,
+)
+
 
 
 class VehicleService:
 
-    @staticmethod
-    def create_vehicle(
-        db: Session,
-        vehicle: VehicleCreate,
-    ) -> Vehicle:
 
-        existing_vehicle = VehicleRepository.get_by_number(
-            db,
-            vehicle.vehicle_number,
+    def __init__(
+        self,
+        db: Session
+    ):
+
+        self.db = db
+
+        self.vehicle_repo = VehicleRepository(
+            db
         )
 
-        if existing_vehicle:
-            raise HTTPException(
-                status_code=409,
-                detail=f"Vehicle '{vehicle.vehicle_number}' already exists.",
+
+
+    # ---------------------------------
+    # Create Vehicle
+    # ---------------------------------
+
+    def create_vehicle(
+        self,
+        vehicle_data: VehicleCreate
+    ):
+
+
+        existing_vehicle = (
+
+            self.db.query(Vehicle)
+
+            .filter(
+                Vehicle.vehicle_number
+                ==
+                vehicle_data.vehicle_number
             )
 
-        return VehicleRepository.create(db, vehicle)
+            .first()
 
-    @staticmethod
-    def get_all_vehicles(db: Session) -> list[Vehicle]:
-        return VehicleRepository.get_all(db)
-
-    @staticmethod
-    def get_vehicle_by_id(
-        db: Session,
-        vehicle_id: UUID,
-    ) -> Vehicle | None:
-        return VehicleRepository.get_by_id(db, vehicle_id)
-
-    @staticmethod
-    def update_vehicle(
-        db: Session,
-        vehicle_id: UUID,
-        vehicle: VehicleUpdate,
-    ) -> Vehicle | None:
-        return VehicleRepository.update(
-            db,
-            vehicle_id,
-            vehicle,
         )
 
-    @staticmethod
-    def delete_vehicle(
-        db: Session,
+
+        if existing_vehicle:
+
+            raise HTTPException(
+
+                status_code=409,
+
+                detail="Vehicle number already exists."
+
+            )
+
+
+
+        vehicle = Vehicle(
+
+            **vehicle_data.model_dump()
+
+        )
+
+
+        return self.vehicle_repo.create(
+            vehicle
+        )
+
+
+
+    # ---------------------------------
+    # Get All Vehicles
+    # ---------------------------------
+
+    def get_all_vehicles(self):
+
+        return self.vehicle_repo.get_all()
+
+
+
+    # ---------------------------------
+    # Get Vehicle By ID
+    # ---------------------------------
+
+    def get_vehicle_by_id(
+        self,
+        vehicle_id: UUID
+    ):
+
+        return self.vehicle_repo.get_by_id(
+            vehicle_id
+        )
+
+
+
+    # ---------------------------------
+    # Update Vehicle
+    # ---------------------------------
+
+    def update_vehicle(
+        self,
         vehicle_id: UUID,
-    ) -> Vehicle | None:
-        return VehicleRepository.delete(
-            db,
-            vehicle_id,
+        vehicle_data: VehicleUpdate
+    ):
+
+
+        vehicle = (
+
+            self.vehicle_repo.get_by_id(
+                vehicle_id
+            )
+
+        )
+
+
+        if not vehicle:
+
+            return None
+
+
+
+        return self.vehicle_repo.update(
+
+            vehicle,
+
+            vehicle_data
+
+        )
+
+
+
+    # ---------------------------------
+    # Delete Vehicle
+    # ---------------------------------
+
+    def delete_vehicle(
+        self,
+        vehicle_id: UUID
+    ):
+
+
+        vehicle = (
+
+            self.vehicle_repo.get_by_id(
+                vehicle_id
+            )
+
+        )
+
+
+        if not vehicle:
+
+            return None
+
+
+
+        return self.vehicle_repo.delete(
+            vehicle
         )

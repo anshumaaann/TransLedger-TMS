@@ -1,98 +1,205 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+)
+
 from sqlalchemy.orm import Session
 
+
 from app.db.session import get_db
+
+
 from app.schemas.broker import (
     BrokerCreate,
     BrokerResponse,
     BrokerUpdate,
 )
-from app.services.broker_service import BrokerService
 
-router = APIRouter(
-    prefix="/brokers",
-    tags=["Brokers"],
+
+from app.services.broker_service import (
+    BrokerService
 )
 
 
+
+router = APIRouter(
+
+    prefix="/brokers",
+
+    tags=["Brokers"]
+
+)
+
+
+
+
+
 # Create Broker
-@router.post("/", response_model=BrokerResponse)
+
+@router.post(
+    "/",
+    response_model=BrokerResponse
+)
 def create_broker(
+
     broker: BrokerCreate,
-    db: Session = Depends(get_db),
+
+    db: Session = Depends(get_db)
+
 ):
-    return BrokerService.create_broker(db, broker)
+
+    service = BrokerService(db)
+
+    return service.create_broker(
+        broker
+    )
+
+
+
 
 
 # Get All Brokers
-@router.get("/", response_model=list[BrokerResponse])
+
+@router.get(
+    "/",
+    response_model=list[BrokerResponse]
+)
 def get_all_brokers(
-    db: Session = Depends(get_db),
+
+    db: Session = Depends(get_db)
+
 ):
-    return BrokerService.get_all_brokers(db)
+
+    service = BrokerService(db)
+
+    return service.get_all_brokers()
+
+
+
 
 
 # Get Broker By ID
-@router.get("/{broker_id}", response_model=BrokerResponse)
+
+@router.get(
+    "/{broker_id}",
+    response_model=BrokerResponse
+)
 def get_broker_by_id(
+
     broker_id: UUID,
-    db: Session = Depends(get_db),
+
+    db: Session = Depends(get_db)
+
 ):
-    broker = BrokerService.get_broker_by_id(
-        db,
-        broker_id,
+
+    service = BrokerService(db)
+
+
+    broker = service.get_broker_by_id(
+        broker_id
     )
 
-    if broker is None:
+
+    if not broker:
+
         raise HTTPException(
+
             status_code=404,
-            detail="Broker not found",
+
+            detail="Broker not found"
+
         )
+
 
     return broker
 
 
+
+
+
 # Update Broker
-@router.put("/{broker_id}", response_model=BrokerResponse)
+
+@router.put(
+    "/{broker_id}",
+    response_model=BrokerResponse
+)
 def update_broker(
+
     broker_id: UUID,
+
     broker: BrokerUpdate,
-    db: Session = Depends(get_db),
+
+    db: Session = Depends(get_db)
+
 ):
-    updated_broker = BrokerService.update_broker(
-        db,
+
+    service = BrokerService(db)
+
+
+    updated = service.update_broker(
+
         broker_id,
-        broker,
+
+        broker
+
     )
 
-    if updated_broker is None:
+
+    if not updated:
+
         raise HTTPException(
+
             status_code=404,
-            detail="Broker not found",
+
+            detail="Broker not found"
+
         )
 
-    return updated_broker
+
+    return updated
 
 
-# Soft Delete Broker
-@router.delete("/{broker_id}")
+
+
+
+# Delete Broker
+
+@router.delete(
+    "/{broker_id}"
+)
 def delete_broker(
+
     broker_id: UUID,
-    db: Session = Depends(get_db),
+
+    db: Session = Depends(get_db)
+
 ):
-    broker = BrokerService.delete_broker(
-        db,
-        broker_id,
+
+    service = BrokerService(db)
+
+
+    deleted = service.delete_broker(
+        broker_id
     )
 
-    if broker is None:
+
+    if not deleted:
+
         raise HTTPException(
+
             status_code=404,
-            detail="Broker not found",
+
+            detail="Broker not found"
+
         )
+
 
     return {
-        "message": "Broker deleted successfully"
+
+        "message":
+        "Broker deleted successfully"
+
     }

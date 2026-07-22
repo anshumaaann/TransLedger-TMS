@@ -1,80 +1,145 @@
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.repositories.location_repository import LocationRepository
+from app.models.location import Location
+
+from app.repositories.location_repository import (
+    LocationRepository
+)
+
 from app.schemas.location import (
     LocationCreate,
     LocationUpdate,
 )
 
 
+
 class LocationService:
 
-    def __init__(self, db: Session):
-        self.repo = LocationRepository(db)
 
-    def create_location(self, location_data: LocationCreate):
+    def __init__(
+        self,
+        db: Session
+    ):
 
-        existing = self.repo.get_by_name(
-            location_data.location_name
+        self.db = db
+
+        self.location_repo = LocationRepository(
+            db
         )
 
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Location already exists."
-            )
 
-        return self.repo.create(location_data)
+
+    # ---------------------------------
+    # Create Location
+    # ---------------------------------
+
+    def create_location(
+        self,
+        location_data: LocationCreate
+    ):
+
+
+        location = Location(
+
+            **location_data.model_dump()
+
+        )
+
+
+        return self.location_repo.create(
+            location
+        )
+
+
+
+    # ---------------------------------
+    # Get All Locations
+    # ---------------------------------
 
     def get_all_locations(self):
-        return self.repo.get_all()
 
-    def get_location(self, location_id: UUID):
+        return self.location_repo.get_all()
 
-        location = self.repo.get_by_id(location_id)
 
-        if not location:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Location not found."
-            )
 
-        return location
+    # ---------------------------------
+    # Get Location By ID
+    # ---------------------------------
+
+    def get_location_by_id(
+        self,
+        location_id: UUID
+    ):
+
+        return self.location_repo.get_by_id(
+            location_id
+        )
+
+
+
+    # ---------------------------------
+    # Update Location
+    # ---------------------------------
 
     def update_location(
         self,
         location_id: UUID,
-        location_data: LocationUpdate,
+        location_data: LocationUpdate
     ):
 
-        location = self.repo.get_by_id(location_id)
 
-        if not location:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Location not found."
+        location = (
+
+            self.location_repo.get_by_id(
+                location_id
             )
 
-        return self.repo.update(
-            location,
-            location_data,
         )
 
-    def delete_location(self, location_id: UUID):
-
-        location = self.repo.get_by_id(location_id)
 
         if not location:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Location not found."
+
+            return None
+
+
+
+        return self.location_repo.update(
+
+            location,
+
+            location_data
+
+        )
+
+
+
+    # ---------------------------------
+    # Delete Location
+    # ---------------------------------
+
+    def delete_location(
+        self,
+        location_id: UUID
+    ):
+
+
+        location = (
+
+            self.location_repo.get_by_id(
+                location_id
             )
 
-        self.repo.delete(location)
+        )
 
-        return {
-            "message": "Location deleted successfully."
-        }
+
+        if not location:
+
+            return None
+
+
+
+        return self.location_repo.delete(
+            location
+        )

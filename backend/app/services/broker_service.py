@@ -4,60 +4,170 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.broker import Broker
-from app.repositories.broker_repository import BrokerRepository
-from app.schemas.broker import BrokerCreate, BrokerUpdate
+
+from app.repositories.broker_repository import (
+    BrokerRepository
+)
+
+from app.schemas.broker import (
+    BrokerCreate,
+    BrokerUpdate,
+)
+
 
 
 class BrokerService:
 
-    @staticmethod
-    def create_broker(
-        db: Session,
-        broker: BrokerCreate,
-    ) -> Broker:
 
-        existing_broker = BrokerRepository.get_by_code(
-            db,
-            broker.broker_code,
+    def __init__(
+        self,
+        db: Session
+    ):
+
+        self.db = db
+
+        self.broker_repo = BrokerRepository(
+            db
         )
 
-        if existing_broker:
-            raise HTTPException(
-                status_code=409,
-                detail=f"Broker code '{broker.broker_code}' already exists.",
+
+
+    # ---------------------------------
+    # Create Broker
+    # ---------------------------------
+
+    def create_broker(
+        self,
+        broker_data: BrokerCreate
+    ):
+
+
+        existing_broker = (
+
+            self.db.query(Broker)
+
+            .filter(
+                Broker.broker_code
+                ==
+                broker_data.broker_code
             )
 
-        return BrokerRepository.create(db, broker)
+            .first()
 
-    @staticmethod
-    def get_all_brokers(db: Session) -> list[Broker]:
-        return BrokerRepository.get_all(db)
-
-    @staticmethod
-    def get_broker_by_id(
-        db: Session,
-        broker_id: UUID,
-    ) -> Broker | None:
-        return BrokerRepository.get_by_id(db, broker_id)
-
-    @staticmethod
-    def update_broker(
-        db: Session,
-        broker_id: UUID,
-        broker: BrokerUpdate,
-    ) -> Broker | None:
-        return BrokerRepository.update(
-            db,
-            broker_id,
-            broker,
         )
 
-    @staticmethod
-    def delete_broker(
-        db: Session,
+
+        if existing_broker:
+
+            raise HTTPException(
+
+                status_code=409,
+
+                detail="Broker code already exists."
+
+            )
+
+
+
+        broker = Broker(
+
+            **broker_data.model_dump()
+
+        )
+
+
+        return self.broker_repo.create(
+            broker
+        )
+
+
+
+    # ---------------------------------
+    # Get All Brokers
+    # ---------------------------------
+
+    def get_all_brokers(self):
+
+        return self.broker_repo.get_all()
+
+
+
+    # ---------------------------------
+    # Get Broker By ID
+    # ---------------------------------
+
+    def get_broker_by_id(
+        self,
+        broker_id: UUID
+    ):
+
+        return self.broker_repo.get_by_id(
+            broker_id
+        )
+
+
+
+    # ---------------------------------
+    # Update Broker
+    # ---------------------------------
+
+    def update_broker(
+        self,
         broker_id: UUID,
-    ) -> Broker | None:
-        return BrokerRepository.delete(
-            db,
-            broker_id,
+        broker_data: BrokerUpdate
+    ):
+
+
+        broker = (
+
+            self.broker_repo.get_by_id(
+                broker_id
+            )
+
+        )
+
+
+        if not broker:
+
+            return None
+
+
+
+        return self.broker_repo.update(
+
+            broker,
+
+            broker_data
+
+        )
+
+
+
+    # ---------------------------------
+    # Delete Broker
+    # ---------------------------------
+
+    def delete_broker(
+        self,
+        broker_id: UUID
+    ):
+
+
+        broker = (
+
+            self.broker_repo.get_by_id(
+                broker_id
+            )
+
+        )
+
+
+        if not broker:
+
+            return None
+
+
+
+        return self.broker_repo.delete(
+            broker
         )

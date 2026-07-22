@@ -1,11 +1,5 @@
-function App() {
-  return (
-    <div className="flex h-screen items-center justify-center bg-slate-900">
-      <h1 className="text-5xl font-bold text-white">
-        TransLedger-TMS 🚛
-      </h1>
-    </div>
-  );
-}
+import AppRouter from "./routes/AppRouter";
 
-export default App;
+export default function App() {
+  return <AppRouter />;
+}

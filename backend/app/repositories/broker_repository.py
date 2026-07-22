@@ -3,115 +3,101 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.models.broker import Broker
-from app.schemas.broker import BrokerCreate, BrokerUpdate
+from app.schemas.broker import BrokerUpdate
 
 
 class BrokerRepository:
 
-    @staticmethod
-    def create(db: Session, broker: BrokerCreate) -> Broker:
-        db_broker = Broker(
-            broker_code=broker.broker_code,
-            broker_name=broker.broker_name,
-            contact_person=broker.contact_person,
-            mobile=broker.mobile,
-            email=broker.email,
-            address=broker.address,
-        )
 
-        db.add(db_broker)
-        db.commit()
-        db.refresh(db_broker)
+    def __init__(
+        self,
+        db: Session
+    ):
+        self.db = db
 
-        return db_broker
 
-    @staticmethod
-    def get_by_code(
-        db: Session,
-        broker_code: str,
-    ) -> Broker | None:
+
+    def get_all(self):
+
         return (
-            db.query(Broker)
+            self.db.query(Broker)
             .filter(
-                Broker.broker_code == broker_code,
-                Broker.is_active.is_(True),
+                Broker.is_active == True
             )
-            .first()
-        )
-
-    @staticmethod
-    def get_all(db: Session) -> list[Broker]:
-        return (
-            db.query(Broker)
-            .filter(Broker.is_active.is_(True))
+            .order_by(
+                Broker.created_at.desc()
+            )
             .all()
         )
 
-    @staticmethod
+
+
     def get_by_id(
-        db: Session,
-        broker_id: UUID,
-    ) -> Broker | None:
+        self,
+        broker_id: UUID
+    ):
+
         return (
-            db.query(Broker)
+            self.db.query(Broker)
             .filter(
                 Broker.id == broker_id,
-                Broker.is_active.is_(True),
+                Broker.is_active == True
             )
             .first()
         )
 
-    @staticmethod
+
+
+    def create(
+        self,
+        broker
+    ):
+
+        self.db.add(broker)
+
+        self.db.commit()
+
+        self.db.refresh(broker)
+
+        return broker
+
+
+
     def update(
-        db: Session,
-        broker_id: UUID,
-        broker: BrokerUpdate,
-    ) -> Broker | None:
+        self,
+        broker,
+        broker_data: BrokerUpdate
+    ):
 
-        db_broker = (
-            db.query(Broker)
-            .filter(
-                Broker.id == broker_id,
-                Broker.is_active.is_(True),
-            )
-            .first()
+        data = broker_data.model_dump(
+            exclude_unset=True
         )
 
-        if db_broker is None:
-            return None
 
-        db_broker.broker_name = broker.broker_name
-        db_broker.contact_person = broker.contact_person
-        db_broker.mobile = broker.mobile
-        db_broker.email = broker.email
-        db_broker.address = broker.address
+        for key,value in data.items():
 
-        db.commit()
-        db.refresh(db_broker)
+            setattr(
+                broker,
+                key,
+                value
+            )
 
-        return db_broker
 
-    @staticmethod
+        self.db.commit()
+
+        self.db.refresh(broker)
+
+        return broker
+
+
+
     def delete(
-        db: Session,
-        broker_id: UUID,
-    ) -> Broker | None:
+        self,
+        broker
+    ):
 
-        db_broker = (
-            db.query(Broker)
-            .filter(
-                Broker.id == broker_id,
-                Broker.is_active.is_(True),
-            )
-            .first()
-        )
+        broker.is_active = False
 
-        if db_broker is None:
-            return None
+        self.db.commit()
 
-        db_broker.is_active = False
-
-        db.commit()
-        db.refresh(db_broker)
-
-        return db_broker
+        return broker

@@ -3,119 +3,111 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.models.customer import Customer
-from app.schemas.customer import CustomerCreate, CustomerUpdate
+from app.schemas.customer import CustomerUpdate
 
 
 class CustomerRepository:
 
-    @staticmethod
-    def create(db: Session, customer: CustomerCreate) -> Customer:
-        db_customer = Customer(
-            customer_code=customer.customer_code,
-            customer_name=customer.customer_name,
-            short_name=customer.short_name,
-            gst_number=customer.gst_number,
-            contact_person=customer.contact_person,
-            mobile=customer.mobile,
-            email=customer.email,
-            address=customer.address,
-        )
 
-        db.add(db_customer)
-        db.commit()
-        db.refresh(db_customer)
+    def __init__(
+        self,
+        db: Session
+    ):
+        self.db = db
 
-        return db_customer
 
-    @staticmethod
-    def get_by_code(
-        db: Session,
-        customer_code: str,
-    ) -> Customer | None:
+
+    # Get All Customers
+
+    def get_all(self):
+
         return (
-            db.query(Customer)
+            self.db.query(Customer)
             .filter(
-                Customer.customer_code == customer_code,
-                Customer.is_active.is_(True),
+                Customer.is_active == True
             )
-            .first()
-        )
-
-    @staticmethod
-    def get_all(db: Session) -> list[Customer]:
-        return (
-            db.query(Customer)
-            .filter(Customer.is_active.is_(True))
+            .order_by(
+                Customer.created_at.desc()
+            )
             .all()
         )
 
-    @staticmethod
+
+
+    # Get Customer By ID
+
     def get_by_id(
-        db: Session,
-        customer_id: UUID,
-    ) -> Customer | None:
+        self,
+        customer_id: UUID
+    ):
+
         return (
-            db.query(Customer)
+            self.db.query(Customer)
             .filter(
                 Customer.id == customer_id,
-                Customer.is_active.is_(True),
+                Customer.is_active == True
             )
             .first()
         )
 
-    @staticmethod
+
+
+    # Create Customer
+
+    def create(
+        self,
+        customer
+    ):
+
+        self.db.add(customer)
+
+        self.db.commit()
+
+        self.db.refresh(customer)
+
+        return customer
+
+
+
+    # Update Customer
+
     def update(
-        db: Session,
-        customer_id: UUID,
-        customer: CustomerUpdate,
-    ) -> Customer | None:
+        self,
+        customer,
+        customer_data: CustomerUpdate
+    ):
 
-        db_customer = (
-            db.query(Customer)
-            .filter(
-                Customer.id == customer_id,
-                Customer.is_active.is_(True),
-            )
-            .first()
+        data = customer_data.model_dump(
+            exclude_unset=True
         )
 
-        if db_customer is None:
-            return None
 
-        db_customer.customer_name = customer.customer_name
-        db_customer.short_name = customer.short_name
-        db_customer.gst_number = customer.gst_number
-        db_customer.contact_person = customer.contact_person
-        db_customer.mobile = customer.mobile
-        db_customer.email = customer.email
-        db_customer.address = customer.address
+        for key,value in data.items():
 
-        db.commit()
-        db.refresh(db_customer)
+            setattr(
+                customer,
+                key,
+                value
+            )
 
-        return db_customer
 
-    @staticmethod
+        self.db.commit()
+
+        self.db.refresh(customer)
+
+        return customer
+
+
+
+    # Soft Delete
+
     def delete(
-        db: Session,
-        customer_id: UUID,
-    ) -> Customer | None:
+        self,
+        customer
+    ):
 
-        db_customer = (
-            db.query(Customer)
-            .filter(
-                Customer.id == customer_id,
-                Customer.is_active.is_(True),
-            )
-            .first()
-        )
+        customer.is_active = False
 
-        if db_customer is None:
-            return None
+        self.db.commit()
 
-        db_customer.is_active = False
-
-        db.commit()
-        db.refresh(db_customer)
-
-        return db_customer
+        return customer
