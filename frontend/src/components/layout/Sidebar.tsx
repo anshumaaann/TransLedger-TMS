@@ -27,7 +27,11 @@ const links = [
   { label: "Settings", icon: IconSettings, to: "/settings" },
 ];
 
-export default function AppSidebar() {
+interface Props {
+  onNavigate?: () => void;
+}
+
+export default function AppSidebar({ onNavigate }: Props) {
   const location = useLocation();
   const { user } = useAuth();
   const visibleLinks = user?.role === "admin"
@@ -44,6 +48,7 @@ export default function AppSidebar() {
           label={item.label}
           leftSection={<item.icon size={18} />}
           active={location.pathname === item.to}
+          onClick={onNavigate}
         />
       ))}
     </Stack>

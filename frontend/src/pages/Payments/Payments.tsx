@@ -53,7 +53,7 @@ export default function Payments() {
   const bookingOptions = bookings.map((booking: any) => {
     const customer = customers.find((item: any) => item.id === booking.customer_id)?.customer_name || "Customer";
     const broker = brokers.find((item: any) => item.id === booking.broker_id)?.broker_name || "Broker";
-    return { value: booking.id, label: `${booking.booking_number} — ${customer} / ${broker}` };
+    return { value: booking.id, label: `${booking.booking_number} | Booking date: ${booking.booking_date} | ${customer} / ${broker}` };
   });
   const bookingById = bookings.find((booking: any) => booking.id === form.values.booking_id);
   const pending = form.values.party_type === "customer"
@@ -78,13 +78,15 @@ export default function Payments() {
       </Group>
 
       <Card shadow="sm" padding="lg" withBorder>
+        <Table.ScrollContainer minWidth={900}>
         <Table striped highlightOnHover>
-          <Table.Thead><Table.Tr><Table.Th>Date</Table.Th><Table.Th>Booking</Table.Th><Table.Th>Party</Table.Th><Table.Th>Cash amount</Table.Th><Table.Th>TDS</Table.Th><Table.Th>Reference</Table.Th><Table.Th>Action</Table.Th></Table.Tr></Table.Thead>
+          <Table.Thead><Table.Tr><Table.Th>Payment Date</Table.Th><Table.Th>Booking Date</Table.Th><Table.Th>Booking</Table.Th><Table.Th>Party</Table.Th><Table.Th>Cash amount</Table.Th><Table.Th>TDS</Table.Th><Table.Th>Reference</Table.Th><Table.Th>Action</Table.Th></Table.Tr></Table.Thead>
           <Table.Tbody>
             {payments.map((payment) => {
               const booking = bookings.find((item: any) => item.id === payment.booking_id);
               return <Table.Tr key={payment.id}>
                 <Table.Td>{payment.payment_date}</Table.Td>
+                <Table.Td>{booking?.booking_date || "-"}</Table.Td>
                 <Table.Td>{booking?.booking_number || "-"}</Table.Td>
                 <Table.Td>{payment.party_type === "customer" ? "Customer received" : "Broker paid"}</Table.Td>
                 <Table.Td>₹ {amount(payment.amount).toFixed(2)}</Table.Td>
@@ -100,9 +102,10 @@ export default function Payments() {
                 }}><IconTrash size={16} /></ActionIcon></Table.Td>
               </Table.Tr>;
             })}
-            {!payments.length && <Table.Tr><Table.Td colSpan={7}>No payments have been recorded yet.</Table.Td></Table.Tr>}
+            {!payments.length && <Table.Tr><Table.Td colSpan={8}>No payments have been recorded yet.</Table.Td></Table.Tr>}
           </Table.Tbody>
         </Table>
+        </Table.ScrollContainer>
       </Card>
 
       <Modal opened={opened} onClose={() => setOpened(false)} title="Record Payment" centered>
@@ -128,7 +131,7 @@ export default function Payments() {
           <Stack>
             <Select label="Booking" searchable data={bookingOptions} placeholder="Select booking" {...form.getInputProps("booking_id")} />
             <Select label="Payment type" data={[{ value: "customer", label: "Customer paid us" }, { value: "broker", label: "We paid broker" }]} {...form.getInputProps("party_type")} />
-            {bookingById && <Alert color={pending === 0 ? "green" : "blue"}>Pending on this booking: ₹ {pending.toFixed(2)}</Alert>}
+            {bookingById && <Alert color={pending === 0 ? "green" : "blue"}>Booking date: {bookingById.booking_date} · Pending on this booking: ₹ {pending.toFixed(2)}</Alert>}
             <DateInput label="Payment Date" {...form.getInputProps("payment_date")} />
             <NumberInput label={form.values.party_type === "customer" ? "Cash received (₹)" : "Cash paid (₹)"} min={0} decimalScale={2} {...form.getInputProps("amount")} />
             {form.values.party_type === "customer" && <NumberInput label="TDS deducted from us (₹)" description="Cash plus TDS cannot be more than the customer pending amount." min={0} decimalScale={2} {...form.getInputProps("tds_amount")} />}

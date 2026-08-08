@@ -374,6 +374,8 @@ export default function Bookings() {
 
       >
 
+        <Table.ScrollContainer minWidth={1050}>
+
 
 
         <Table
@@ -399,6 +401,13 @@ export default function Bookings() {
               </Table.Th>
 
 
+              <Table.Th>
+
+                Booking Date
+
+              </Table.Th>
+
+
 
               <Table.Th>
 
@@ -419,6 +428,19 @@ export default function Bookings() {
               <Table.Th>
 
                 Freight
+
+              </Table.Th>
+
+
+              <Table.Th>
+
+                Customer Pending
+
+              </Table.Th>
+
+              <Table.Th>
+
+                Broker Pending
 
               </Table.Th>
 
@@ -477,6 +499,15 @@ export default function Bookings() {
 
 
                     {booking.booking_number}
+
+
+                  </Table.Td>
+
+
+                  <Table.Td>
+
+
+                    {booking.booking_date}
 
 
                   </Table.Td>
@@ -556,6 +587,22 @@ export default function Bookings() {
 
                   </Table.Td>
 
+
+                  <Table.Td>
+
+
+                    ₹ {booking.customer_balance} ({booking.customer_payment_status})
+
+
+                  </Table.Td>
+
+                  <Table.Td>
+
+
+                    ₹ {booking.broker_balance} ({booking.broker_payment_status})
+
+
+                  </Table.Td>
 
 
 
@@ -670,6 +717,8 @@ export default function Bookings() {
 
 
         </Table>
+
+        </Table.ScrollContainer>
 
 
 
