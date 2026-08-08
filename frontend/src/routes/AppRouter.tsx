@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import ProtectedRoute from "../auth/ProtectedRoute";
+
 import AppLayout from "../components/layout/AppLayout";
 
 import Dashboard from "../pages/Dashboard/Dashboard";
@@ -10,12 +12,20 @@ import Locations from "../pages/Locations/Locations";
 import Bookings from "../pages/Bookings/Bookings";
 import Reports from "../pages/Reports/Reports";
 import Settings from "../pages/Settings/Settings";
+import Login from "../pages/Login/Login";
+import Users from "../pages/Users/Users";
+import Payments from "../pages/Payments/Payments";
+import Ledgers from "../pages/Ledgers/Ledgers";
 
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+
+        <Route path="login" element={<Login />} />
+
+        <Route element={<ProtectedRoute />}>
 
         <Route element={<AppLayout />}>
 
@@ -46,6 +56,10 @@ export default function AppRouter() {
             element={<Bookings />}
           />
 
+          <Route path="payments" element={<Payments />} />
+
+          <Route path="ledgers" element={<Ledgers />} />
+
           <Route
             path="reports"
             element={<Reports />}
@@ -55,6 +69,10 @@ export default function AppRouter() {
             path="settings"
             element={<Settings />}
           />
+
+          <Route path="users" element={<Users />} />
+
+        </Route>
 
         </Route>
 

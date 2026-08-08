@@ -7,12 +7,13 @@ import {
 
 import { useForm } from "@mantine/form";
 import { useEffect } from "react";
+import { notifications } from "@mantine/notifications";
 
 
 interface Props {
   opened: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<unknown>;
   vehicle?: any;
 }
 
@@ -96,14 +97,15 @@ export default function AddVehicleModal({
       <form
 
         onSubmit={
-          form.onSubmit((values)=>{
-
-            onSubmit(values);
-
-            form.reset();
-
-            onClose();
-
+          form.onSubmit(async (values)=>{
+            try {
+              await onSubmit(values);
+              form.reset();
+              onClose();
+              notifications.show({ color: "green", message: vehicle ? "Vehicle updated." : "Vehicle added." });
+            } catch {
+              notifications.show({ color: "red", message: "Could not save the vehicle. Check the required fields." });
+            }
           })
         }
 
@@ -116,6 +118,7 @@ export default function AddVehicleModal({
           <TextInput
 
             label="Vehicle Number"
+            required
 
             {...form.getInputProps(
               "vehicle_number"
@@ -127,6 +130,7 @@ export default function AddVehicleModal({
           <TextInput
 
             label="Vehicle Type"
+            required
 
             placeholder="Truck / Container"
 

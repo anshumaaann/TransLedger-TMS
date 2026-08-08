@@ -87,11 +87,11 @@ export function useCustomers() {
 
 
     createCustomer:
-      createCustomerMutation.mutate,
+      createCustomerMutation.mutateAsync,
 
 
     updateCustomer:
-      updateCustomerMutation.mutate,
+      updateCustomerMutation.mutateAsync,
 
 
     deleteCustomer:

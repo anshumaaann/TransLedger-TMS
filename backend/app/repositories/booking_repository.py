@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.models.booking import Booking
+
 from app.schemas.booking import BookingUpdate
 
 
@@ -93,6 +94,8 @@ class BookingRepository:
         customer_balance,
         broker_balance,
         profit,
+        customer_payment_status,
+        broker_payment_status,
     ):
 
 
@@ -100,34 +103,54 @@ class BookingRepository:
 
             booking_number=booking_number,
 
-            booking_date=booking_data.booking_date,
 
-
-            customer_id=booking_data.customer_id,
-
-            broker_id=booking_data.broker_id,
-
-            vehicle_id=booking_data.vehicle_id,
-
-
-            loading_location_id=
-            booking_data.loading_location_id,
-
-
-            unloading_location_id=
-            booking_data.unloading_location_id,
+            booking_date=
+            booking_data.booking_date,
 
 
 
-            bill_to=booking_data.bill_to,
+            # Master References
+
+            customer_id=
+            booking_data.customer_id,
 
 
-            weight=booking_data.weight,
+            broker_id=
+            booking_data.broker_id,
+
+
+            vehicle_id=
+            booking_data.vehicle_id,
+
+
+
+            # Site References
+
+            loading_site_id=
+            booking_data.loading_site_id,
+
+
+            unloading_site_id=
+            booking_data.unloading_site_id,
+
+
+
+            # Transport Details
+
+            bill_to=
+            booking_data.bill_to,
+
+
+            weight=
+            booking_data.weight,
+
 
             freight_type=
             booking_data.freight_type,
 
 
+
+            # Customer Financials
 
             customer_freight=
             booking_data.customer_freight,
@@ -140,7 +163,15 @@ class BookingRepository:
             customer_balance=
             customer_balance,
 
+            tds_amount=
+            booking_data.tds_amount,
 
+            customer_payment_status=
+            customer_payment_status,
+
+
+
+            # Broker Financials
 
             broker_freight=
             booking_data.broker_freight,
@@ -153,7 +184,12 @@ class BookingRepository:
             broker_balance=
             broker_balance,
 
+            broker_payment_status=
+            broker_payment_status,
 
+
+
+            # Payment
 
             payment_method=
             booking_data.payment_method,
@@ -172,7 +208,11 @@ class BookingRepository:
 
 
 
-            profit=profit,
+            # Profit
+
+            profit=
+            profit,
+
 
 
             remarks=
@@ -182,11 +222,17 @@ class BookingRepository:
 
 
 
-        self.db.add(booking)
+        self.db.add(
+            booking
+        )
+
 
         self.db.commit()
 
-        self.db.refresh(booking)
+
+        self.db.refresh(
+            booking
+        )
 
 
         return booking
@@ -209,7 +255,7 @@ class BookingRepository:
         )
 
 
-        for key,value in data.items():
+        for key, value in data.items():
 
             setattr(
                 booking,
@@ -220,7 +266,10 @@ class BookingRepository:
 
         self.db.commit()
 
-        self.db.refresh(booking)
+
+        self.db.refresh(
+            booking
+        )
 
 
         return booking
@@ -240,6 +289,7 @@ class BookingRepository:
         self.db.delete(
             booking
         )
+
 
         self.db.commit()
 

@@ -84,7 +84,7 @@ export default function Brokers() {
 
 
 
-  const handleSubmit = (
+  const handleSubmit = async (
     values:any
   ) => {
 
@@ -92,7 +92,7 @@ export default function Brokers() {
     if(selectedBroker){
 
 
-      updateBroker({
+      return updateBroker({
 
         id:selectedBroker.id,
 
@@ -105,7 +105,7 @@ export default function Brokers() {
     } else {
 
 
-      createBroker(values);
+      return createBroker(values);
 
 
     }

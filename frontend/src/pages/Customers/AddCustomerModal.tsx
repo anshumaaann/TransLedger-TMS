@@ -7,12 +7,13 @@ import {
 
 import { useForm } from "@mantine/form";
 import { useEffect } from "react";
+import { notifications } from "@mantine/notifications";
 
 
 interface Props {
   opened: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<unknown>;
   customer?: any;
 }
 
@@ -96,14 +97,15 @@ export default function AddCustomerModal({
 
       <form
         onSubmit={
-          form.onSubmit((values) => {
-
-            onSubmit(values);
-
-            form.reset();
-
-            onClose();
-
+          form.onSubmit(async (values) => {
+            try {
+              await onSubmit(values);
+              form.reset();
+              onClose();
+              notifications.show({ color: "green", message: customer ? "Customer updated." : "Customer added." });
+            } catch {
+              notifications.show({ color: "red", message: "Could not save the customer. Check the required fields and email." });
+            }
           })
         }
       >
@@ -114,6 +116,7 @@ export default function AddCustomerModal({
 
           <TextInput
             label="Customer Code"
+            required
             {...form.getInputProps(
               "customer_code"
             )}
@@ -122,6 +125,7 @@ export default function AddCustomerModal({
 
           <TextInput
             label="Customer Name"
+            required
             {...form.getInputProps(
               "customer_name"
             )}
@@ -130,6 +134,7 @@ export default function AddCustomerModal({
 
           <TextInput
             label="Short Name"
+            required
             {...form.getInputProps(
               "short_name"
             )}

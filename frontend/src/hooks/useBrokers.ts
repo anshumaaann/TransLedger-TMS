@@ -112,11 +112,11 @@ export function useBrokers() {
 
 
     createBroker:
-      createBrokerMutation.mutate,
+      createBrokerMutation.mutateAsync,
 
 
     updateBroker:
-      updateBrokerMutation.mutate,
+      updateBrokerMutation.mutateAsync,
 
 
     deleteBroker:

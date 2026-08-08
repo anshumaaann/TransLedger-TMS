@@ -7,12 +7,13 @@ import {
 
 import { useForm } from "@mantine/form";
 import { useEffect } from "react";
+import { notifications } from "@mantine/notifications";
 
 
 interface Props {
   opened: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<unknown>;
   broker?: any;
 }
 
@@ -100,14 +101,15 @@ export default function AddBrokerModal({
       <form
 
         onSubmit={
-          form.onSubmit((values)=>{
-
-            onSubmit(values);
-
-            form.reset();
-
-            onClose();
-
+          form.onSubmit(async (values)=>{
+            try {
+              await onSubmit(values);
+              form.reset();
+              onClose();
+              notifications.show({ color: "green", message: broker ? "Broker updated." : "Broker added." });
+            } catch {
+              notifications.show({ color: "red", message: "Could not save the broker. Check the required fields and email." });
+            }
           })
         }
 
@@ -120,6 +122,7 @@ export default function AddBrokerModal({
           <TextInput
 
             label="Broker Code"
+            required
 
             {...form.getInputProps(
               "broker_code"
@@ -132,6 +135,7 @@ export default function AddBrokerModal({
           <TextInput
 
             label="Broker Name"
+            required
 
             {...form.getInputProps(
               "broker_name"

@@ -79,14 +79,14 @@ export default function Vehicles() {
 
 
 
-  const handleSubmit = (
+  const handleSubmit = async (
     values:any
   ) => {
 
 
     if(selectedVehicle){
 
-      updateVehicle({
+      return updateVehicle({
 
         id:selectedVehicle.id,
 
@@ -98,7 +98,7 @@ export default function Vehicles() {
     }else{
 
 
-      createVehicle(values);
+      return createVehicle(values);
 
 
     }

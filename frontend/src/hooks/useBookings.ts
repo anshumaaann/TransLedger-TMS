@@ -112,11 +112,11 @@ export function useBookings() {
 
 
     createBooking:
-      createBookingMutation.mutate,
+      createBookingMutation.mutateAsync,
 
 
     updateBooking:
-      updateBookingMutation.mutate,
+      updateBookingMutation.mutateAsync,
 
 
     deleteBooking:

@@ -52,18 +52,18 @@ export default function Customers() {
   };
 
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = async (values: any) => {
 
     if (selectedCustomer) {
 
-      updateCustomer({
+      return updateCustomer({
         id: selectedCustomer.id,
         data: values,
       });
 
     } else {
 
-      createCustomer(values);
+      return createCustomer(values);
 
     }
 

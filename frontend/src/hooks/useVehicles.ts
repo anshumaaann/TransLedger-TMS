@@ -90,11 +90,11 @@ export function useVehicles() {
 
 
     createVehicle:
-      createVehicleMutation.mutate,
+      createVehicleMutation.mutateAsync,
 
 
     updateVehicle:
-      updateVehicleMutation.mutate,
+      updateVehicleMutation.mutateAsync,
 
 
     deleteVehicle:
